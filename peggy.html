@@ -1,0 +1,135 @@
+<!-- make unique visuals for amhacb -->
+
+<head>
+  <style>
+  video
+  {
+    height: 100vh;
+    width: 100%;
+    left: 0;
+    top: 0;
+    position: absolute;
+    z-index: 10;
+    object-fit: cover;
+  }
+      
+      
+    </style>
+    <title>visualizer</title>
+</head>
+<body>
+  <video id="bg" loop muted autoplay poster="">
+      
+      <source id="bg-source" src="video.mp4" type="video/mp4" poster="">
+      
+  </video>
+  <center>
+   <h1>PLAY A PEGGY CORNBALL SONG TO START!</h1>
+   <h3>(if nothing happens you may need to <a href="https://clemmers.github.io/peggyvisualizer/">relogin</a>)</h3>
+  </center>
+
+   <script>
+        
+        // previously played song
+        var PREVIOUS_SONG_DIRECTORY = "";
+        // is it ok to have this here?
+        const clientId = 'e7bd1ac5173c4605b31d7a94fbebf8a4';
+        
+        const redirectUri = 'https://clemmers.github.io/peggyvisualizer/peggy.html';
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        let code = urlParams.get('code');
+        console.log(code)
+        
+        
+        if(!code && !localStorage.getItem('access_token'))
+          window.location.replace('login.html');
+        
+        let body = new URLSearchParams({
+          grant_type: 'authorization_code',
+          code: code,
+          redirect_uri: redirectUri,
+          client_id: clientId,
+          code_verifier: localStorage.getItem('code_verifier')
+        });
+        
+        
+        
+        const response = fetch('https://accounts.spotify.com/api/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: body
+        })
+          .then(response => {
+            if (!response.ok) {
+              
+              throw new Error('HTTP status ' + response.status);
+            }
+            return response.json();
+          })
+          .then(data => {
+            localStorage.setItem('access_token', data.access_token);
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+          
+  
+  function setBackgroundVideo(video)
+  {
+    document.getElementById("bg-source").src = video;
+    document.getElementById("bg").load();
+  }
+  
+    
+   function getCurrentlyPlayingTrack()
+   {
+    const accessToken = localStorage.getItem('access_token');
+
+    fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      // const trackName = data.item.name;
+      // const artistName = data.item.artists[0].name;
+      // const albumImage = data.item.album.images[0].url;
+      isACornball(data);
+
+      // document.getElementById('track-name').textContent = trackName;
+      // document.getElementById('artist-name').textContent = artistName;
+      // document.getElementById('album-image').setAttribute('src', albumImage);
+    })
+    .catch(error => {
+      console.error(error);
+      //window.location.replace('login.html');
+    });
+    
+   }
+   
+   // checks to see if current track
+   // is in JPEGMAFIA's album
+   // all my heroes are cornballs
+   function isACornball(data)
+   {
+     console.log(data);
+     if(data.item.artists[0].name.toLowerCase() === "jpegmafia" && data.item.album.name.toLowerCase() === "all my heroes are cornballs" && data.item.name !== PREVIOUS_SONG_DIRECTORY)
+     {
+       let SONG_DIRECTORY = `./peggy/${data.item.name.replace(/[^a-z0-9]/gi, '').toLowerCase()}.mp4`
+       if( SONG_DIRECTORY !== PREVIOUS_SONG_DIRECTORY )
+        setBackgroundVideo(SONG_DIRECTORY);
+       
+       PREVIOUS_SONG_DIRECTORY = SONG_DIRECTORY;
+     }
+   }
+   
+   setInterval(() => {
+     getCurrentlyPlayingTrack();
+   }, 1000);
+    
+   </script>
+</body>
