@@ -2,9 +2,48 @@
 
 <head>
     <title>visualizer</title>
+    <style type="text/css">
+        
+        body
+        {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #login-wrapper img
+        {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            -webkit-transition: opacity 0.5s ease-out;
+            -moz-transition: opacity 0.5s ease-out;
+            -o-transition: opacity 0.5s ease-out;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        #login-wrapper:hover .top
+        {
+            opacity: 0;
+        }
+        map:hover
+        {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h1>Login with Spotify</h1>
-    <button onclick="login()">Log in with Spotify</button>
+    <div id="login-wrapper">
+  <img class="bottom" src="./content/login_hover.png" usemap="#login-map"/>
+  <img class="top" src="./content/login.png" usemap="#login-map"/>
+  <map name="login-map">
+    <area shape="rect" coords="313,198,631,259" onclick="login()" />
+</map>
+</div>
+
+
     <script src="auth.js"></script>
 </body>
